@@ -127,7 +127,7 @@ watershed_sf <- tbcmp_counties |>
                 st_transform(4326)
 
 # Bounding box for station search (add 0.1° buffer)
-bb <- st_bbox(watershed_sf)
+bb <- st_bbox(usgs_watershed_sf)
 buffer <- 0.25
 bbx <- c(xmin = bb["xmin"] - buffer,
          ymin = bb["ymin"] - buffer,
@@ -136,7 +136,7 @@ bbx <- c(xmin = bb["xmin"] - buffer,
 
 # ── 2. Fetch GHCN-Daily Station Inventory ────────────────────────────────────
 
-message("Searching GHCN-Daily stations in Tampa Bay region …")
+message("Searching GHCN-Daily stations in TBCMP region …")
 
 stations <- ghcnd_stations()
 
