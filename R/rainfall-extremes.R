@@ -1,16 +1,16 @@
 ###############################################################################
-# Tampa Bay Watershed — Rainfall Extremes Trend Analysis
+# Tampa Bay Coastal Master Plan — Rainfall Extremes Trend Analysis
 # Replicates key analyses from:
 #   Wright, D.B., Bosma, C.D., & Lopez-Cantu, T. (2019).
 #   "U.S. Hydrologic Design Standards Insufficient Due to Large Increases in
 #    Frequency of Rainfall Extremes." Geophysical Research Letters, 46, 8144-8153.
 #   https://doi.org/10.1029/2019GL083235
 #
-# Scope: All GHCN-Daily stations within the Tampa Bay estuary watershed boundary
-# Study period: 1920–2025 (extending the paper's primary analysis window)
+# Scope: All GHCN-Daily stations within the Tampa Bay Coastal Master Plan project
+# area. Study period: 1920–2025 (extending the paper's primary analysis window)
 #
 # Analyses replicated:
-#   1. GHCN station retrieval and spatial filter to Tampa Bay watershed
+#   1. GHCN station retrieval and spatial filter to TBCMP county areas
 #   2. Exceedance counting relative to NOAA Atlas 14 IDF estimates (Section 3.1)
 #   3. Negative binomial regression trend analysis (Section 3.1)
 #   4. Rainstorm cluster identification (Section 3.2 / Section 2.4)
@@ -49,7 +49,7 @@ library(patchwork)
 library(scales)
 library(httr)
 library(jsonlite)
-library(tigris)       # Florida county shapefiles (fallback watershed boundary)
+library(tigris)       # Florida county shapefiles
 library(units)
 
 options(tigris_use_cache = TRUE)
@@ -67,7 +67,7 @@ if (nchar(noaa_key) == 0) {
   )
 }
 
-set.seed(2019)  # reproducibility
+set.seed(2026)  # reproducibility
 
 STUDY_START <- 1900L
 STUDY_END   <- 2025L
@@ -77,19 +77,19 @@ CLUSTER_DIST_KM <- 25           # km radius for storm clustering
 CLUSTER_DAY_WIN <- 2             # ±days for storm clustering
 
 
-# ── 1. Tampa Bay Watershed Boundary ──────────────────────────────────────────
-# The Tampa Bay estuary watershed spans Hillsborough, Pinellas, Pasco,
-# Manatee, Polk, Sarasota, and Hernando counties (HUC-8 basin 03100206).
-# We use HUC-8 polygons from the USGS NHD as the authoritative boundary.
+# ── 1. Tampa Bay Coastal Master Plan Boundary ──────────────────────────────────────────
+# The Tampa Bay Coastal Master Plan project area spans Hillsborough, Pinellas,
+# Pasco, Manatee, Sarasota, Citrus and Hernando counties.
+# We use HUC-6 polygons from the USGS NHD as the authoritative boundary.
 # A county-union fallback is provided in case the NHD service is unavailable.
 
 fetch_watershed_boundary <- function() {
-  message("Fetching Tampa Bay watershed (HUC-8 03100206) from USGS NHD …")
+  message("Fetching Tampa Bay watershed (HUC-6 031002) from USGS NHD …")
 
-  # USGS National Map / WBD GeoJSON endpoint
+  # USGS National Map / WBD GeoJSON endpoint — Layer 3 = 6-digit HU (Basin)
   url <- paste0(
-    "https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer/4/query",
-    "?where=HUC8%3D%2703100206%27",
+    "https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer/3/query",
+    "?where=huc6%3D%27031002%27",
     "&outFields=*&f=geojson"
   )
 
@@ -98,7 +98,7 @@ fetch_watershed_boundary <- function() {
   if (!is.null(resp) && status_code(resp) == 200) {
     gj  <- content(resp, as = "text", encoding = "UTF-8")
     shp <- st_read(gj, quiet = TRUE)
-    message("  ✓ HUC-8 boundary loaded from USGS NHD.")
+    message("  \u2713 HUC-6 boundary loaded from USGS NHD.")
     return(st_transform(shp, 4326))
   }
 
@@ -109,20 +109,22 @@ fetch_watershed_boundary <- function() {
     st_transform(4326)
 
   tb_counties <- c("Hillsborough", "Pinellas", "Pasco",
-                   "Manatee", "Polk", "Sarasota", "Hernando")
+                   "Manatee", "Sarasota", "Citrus", "Hernando")
 
   watershed <- fl_counties |>
     filter(NAME %in% tb_counties) |>
     st_union() |>
     st_as_sf() |>
-    mutate(name = "Tampa Bay Watershed (county approx.)")
+    mutate(name = "Tampa Bay Coastal Master Plan (county approx.)")
 
   return(watershed)
+
+  saveRDS(watershed, "./data-raw/tbcmp_counties.rds")
 }
 
 usgs_watershed_sf <- fetch_watershed_boundary()
-watershed_sf <- st_read("./data-raw/TBEP_Watershed_Correct_Projection.shp") |>
-                   st_transform(4326)
+watershed_sf <- tbcmp_counties |>
+                st_transform(4326)
 
 # Bounding box for station search (add 0.1° buffer)
 bb <- st_bbox(watershed_sf)
@@ -815,7 +817,7 @@ fig_A <- ggplot() +
   coord_sf(xlim = c(bb["xmin"] - 0.5, bb["xmax"] + 0.5),
            ylim = c(bb["ymin"] - 0.5, bb["ymax"] + 0.5)) +
   labs(
-    title    = "GHCN Stations — Tampa Bay Watershed",
+    title    = "GHCN Stations — TBCMP Project Area",
     subtitle = sprintf("Total 100-year, 24-hr exceedances (1900–2025); N = %d stations",
                        nrow(stations_final)),
     x = "Longitude", y = "Latitude"
@@ -864,7 +866,7 @@ fig_B <- ggplot() +
   scale_x_continuous(breaks = seq(1900, 2030, 10)) +
   labs(
     title    = "Trend in 100-year, 24-hr Rainfall Exceedances",
-    subtitle = "Tampa Bay Watershed (all GHCN stations pooled)",
+    subtitle = "TBCMP Project Area (all GHCN stations pooled)",
     x = "Year", y = "Number of 100-year exceedances"
   ) +
   theme_wb()
@@ -899,7 +901,7 @@ fig_C <- ggplot(trend_summary,
   ) +
   labs(
     title    = "% Change in Exceedance Frequency (1900–2025)",
-    subtitle = "Tampa Bay Watershed + | 24-hr duration",
+    subtitle = "TBCMP Project Area + | 24-hr duration",
     x        = "Duration",
     y        = "Design ARI"
   ) +
@@ -951,7 +953,7 @@ fig_D <- ggplot(fig_D_data, aes(x = year, y = n_clusters, colour = ari)) +
   scale_colour_manual(values = c("10-year" = "grey", "25-year" = "#5e3c99", "100-year" = "#e66101")) +
   scale_x_continuous(breaks = seq(1900, 2030, 10)) +
   labs(
-    title    = "Rainstorm Cluster Trends — Tampa Bay Watershed",
+    title    = "Rainstorm Cluster Trends — TBCMP Project Area",
     subtitle = "Clusters within 25 km / 1 day",
     x = "Year", y = "Number of clusters",
     colour = "Design ARI"
@@ -975,7 +977,7 @@ fig_E <- ggplot(obs_ari_smooth, aes(x = year)) +
   scale_x_continuous(breaks = seq(1900, 2030, 10)) +
   labs(
     title    = "Observed vs. Design ARI — 100-year, 24-hr Event",
-    subtitle = "Tampa Bay Watershed (5-yr moving average in green)",
+    subtitle = "TBCMP Project Area (5-yr moving average in green)",
     x = "Year"
   ) +
   theme_wb()
@@ -985,13 +987,13 @@ combined_plot <- (fig_A | fig_B) /
   (fig_C | fig_D) /
   fig_E +
   plot_annotation(
-    title   = "Tampa Bay Watershed — Rainfall Extremes Trend Analysis",
+    title   = "Tampa Bay Coastal Mster Plan — Rainfall Extremes Trend Analysis",
     subtitle = "Methods follow Wright et al. (2019), GRL 46:8144–8153",
     theme   = theme(plot.title    = element_text(face = "bold", size = 14),
                     plot.subtitle = element_text(size = 10))
   )
 
-output_dir <- "tampa_bay_rainfall_output"
+output_dir <- "tbcmp_rainfall_output"
 dir.create(output_dir, showWarnings = FALSE)
 
 ggsave(file.path(output_dir, "fig_combined.png"),

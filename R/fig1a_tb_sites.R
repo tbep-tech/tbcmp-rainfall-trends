@@ -52,7 +52,7 @@ if (length(missing_objects) > 0) {
   )
 }
 
-output_dir <- "tampa_bay_rainfall_output"
+output_dir <- "tbcmp_rainfall_output"
 dir.create(output_dir, showWarnings = FALSE)
 
 # Study period length — used in the binomial probability calculation
