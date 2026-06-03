@@ -1,12 +1,12 @@
-Tampa Bay Watershed — Rainfall Extremes Trend Analysis
+Tampa Bay Coastal Master Plan Project Area — Rainfall Extremes Trend Analysis
 Replicates key analyses from:
 Wright, D.B., Bosma, C.D., & Lopez-Cantu, T. (2019). "U.S. Hydrologic Design Standards Insufficient Due to Large Increases in Frequency of Rainfall Extremes." Geophysical Research Letters, 46, 8144-8153. https://doi.org/10.1029/2019GL083235
 
-Scope: All GHCN-Daily stations within the Tampa Bay estuary watershed boundary
+Scope: All GHCN-Daily stations within the Tampa Bay Coastal Master Plan project area
 Study period: 1900–2025 (extending the paper's primary analysis window)
 
 Analyses replicated:
-   1. GHCN station retrieval and spatial filter to Tampa Bay watershed
+   1. GHCN station retrieval and spatial filter to TBCMP county boundaries
    2. Exceedance counting relative to NOAA Atlas 14 IDF estimates (Section 3.1)
    3. Negative binomial regression trend analysis (Section 3.1)
    4. Rainstorm cluster identification (Section 3.2 / Section 2.4)
