@@ -20,3 +20,5 @@ Data sources fetched automatically at runtime:
    1. GHCN-Daily via rnoaa::ghcnd_*()
    2. NOAA Atlas 14 IDF values via NOAA Precipitation Frequency Data Server (PFDS) REST API  <https://hdsc.nws.noaa.gov/pfds/>
    3. Tampa Bay watershed boundary via internal shapefile, fallback is the USGS StreamStats or NHD boundary (a local GeoJSON fallback is provided if API is unavailable)
+
+Translation to R: Claude.AI and Ed Sherwood
