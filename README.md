@@ -3,6 +3,7 @@ Replicates key analyses from:
 Wright, D.B., Bosma, C.D., & Lopez-Cantu, T. (2019). "U.S. Hydrologic Design Standards Insufficient Due to Large Increases in Frequency of Rainfall Extremes." Geophysical Research Letters, 46, 8144-8153. https://doi.org/10.1029/2019GL083235
 
 Scope: All GHCN-Daily stations within the Tampa Bay Coastal Master Plan project area
+
 Study period: 1900–2025 (extending the paper's primary analysis window)
 
 Analyses replicated:
@@ -20,3 +21,5 @@ Data sources fetched automatically at runtime:
    1. GHCN-Daily via rnoaa::ghcnd_*()
    2. NOAA Atlas 14 IDF values via NOAA Precipitation Frequency Data Server (PFDS) REST API  <https://hdsc.nws.noaa.gov/pfds/>
    3. Tampa Bay watershed boundary via internal shapefile, fallback is the USGS StreamStats or NHD boundary (a local GeoJSON fallback is provided if API is unavailable)
+
+Translation to R: Claude.AI and Ed Sherwood
