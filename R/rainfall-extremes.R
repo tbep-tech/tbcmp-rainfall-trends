@@ -806,6 +806,11 @@ fig_A <- ggplot() +
     aes(x = longitude, y = latitude, fill = exc_cat, size = exc_cat),
     shape = 21, colour = "black", stroke = 0.4
   ) +
+  geom_text(
+    data = station_plot_df,
+    aes(x = longitude, y = latitude, label = station_id),
+    size = 1.5, vjust = 0, colour = "black", fontface = "bold"
+  ) +
   scale_fill_manual(
     values = c("0" = "grey70", "1" = "#fc8d59", "2" = "#d7301f", "≥3" = "#7f0000"),
     name   = "# of 1-day\n100-yr exceedances"

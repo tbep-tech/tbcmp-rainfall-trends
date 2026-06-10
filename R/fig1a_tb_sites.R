@@ -9,8 +9,8 @@
 # The original Figure 1a shows, for a single GHCN station (Chapel Hill, NC):
 #   • Vertical bars  — calendar 1-day rainfall (mm) for every year 1950–2017
 #   • Three horizontal reference lines — Atlas 14 IDF thresholds for the
-#     10-year, 100-year, and 1000-year, 24-hr events
-#   • Coloured exceedance markers — bars that cross each threshold are
+#     10-year, 25-year, and 100-year, 24-hr events
+#   • Colored exceedance markers — bars that cross each threshold are
 #     highlighted in the threshold's colour
 #   • Annotation — for each threshold: number of observed exceedances and
 #     the binomial probability of seeing that many or more in a stationary
